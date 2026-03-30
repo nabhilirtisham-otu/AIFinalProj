@@ -141,12 +141,40 @@ class MinimaxAI:
     
     #evaluate heuristics (non-terminal states)
     def evaluate_board(self, board, ai_player, human_player):
-        pass
+        score = 0
+        #store all possible winning lines
+        lines = []
+        
+        for i in range(3):
+            #add each row and each element in every row to build columns
+            lines.append(board[i])
+            lines.append(board[0][i], board[1][i], board[2][i])
+        
+        #add diagonals
+        lines.append(board[0][0], board[1][1], board[2][2])
+        lines.append(board[2][0], board[1][1], board[0][2])
+        
+        for line in lines:
+            #if line has at least one AI piece and no human pieces, it is still winnable for the AI
+            if (line.count(ai_player) > 0) and (line.count(human_player) == 0):
+                #higher score means more favorable
+                score += line.count(ai_player)
+            #opposite of above, checks if line is less favorable based on number of human pieces
+            elif (line.count(human_player) > 0) and (line.count(ai_player) == 0):
+                score -= line.count(human_player)
+        
+        return score
     
     #return depth limit based on chosen difficulty (easy/medium/hard)
     def get_depth_limit(self, difficulty):
-        pass
+        if (difficulty == "easy"):
+            return 1
+        if (difficulty == "medium"):
+            return 3
+        else:
+            #full search for hard difficulty
+            return 9
     
-    #choose when to stop recursion based on difficulty (depth limit)
+    #stop recursion if depth being explored is greater than the limit
     def should_use_heuristic(self, depth, depth_limit):
-        pass
+        return depth >= depth_limit
