@@ -67,21 +67,27 @@ def process_metrics(metrics):
 
 #eval all moves and flags the best
 def analyze_moves(evals, best_move):
-
+    
     results = []
-
-    for item in evals:
+    
+    if not evals:
+        return results
+    
+    #sort moves (best first)
+    sorted_evals = sorted(evals, key=lambda x: x["score"], reverse= True)
+    best_score = sorted_evals[0]["score"]
+    
+    for idx, item in enumerate(sorted_evals):
         move = item.get("move")
         score = item.get("score")
 
         results.append({
             "move": move,
             "score": score,
-            "isBest": move == best_move
+            "isBest": move == best_move,
+            "rank": idx + 1,
+            "scoreDiff": best_score - score
         })
-
-    # sort moves (best first for UI clarity)
-    results.sort(key=lambda x: x["score"], reverse=True)
 
     return results
 
@@ -90,7 +96,7 @@ def analyze_moves(evals, best_move):
 def generate_explanation(score, best_move, evals):
 
     if score == 1:
-        return f"Move {best_move} was chosen because it guarantees a win."
+        return f"Move {best_move} was chosen because it guarantees a win with optimal play."
 
     elif score == 0:
         return f"Move {best_move} ensures a draw with optimal play."
@@ -98,25 +104,42 @@ def generate_explanation(score, best_move, evals):
     elif score == -1:
         return f"All possible moves lead to a loss. Move {best_move} was the least damaging option."
 
-    # fallback: compare scores
-    if evals:
-        best_score = max(evals, key=lambda x: x["score"])["score"]
-        return f"Move {best_move} had the highest evaluation score ({best_score}) among all possible moves."
+    #fallback: compare moves
+    if evals and len(evals) > 1:
+        sorted_evals = sorted(evals, key=lambda x: x["score"], reverse=True)
+        
+        best = sorted_evals[0]
+        second = sorted_evals[1]
 
-    return "The AI selected the move with the best available evaluation."
+        diff = best["score"] - second["score"]
+
+        return (
+            f"Move {best_move} was selected because it had the highest evaluation score "
+            f"({best['score']}). The next best move scored {second['score']}, "
+            f"making this move better by {diff}."
+        )
+
+    return "The AI chose the move with the best available evaluation."
 
 #replay of the game
 def build_replay(move_history):
 
     replay = []
+    #build board as well
+    board = [["" for _ in range(3)] for _ in range(3)]
 
     for i, move in enumerate(move_history):
+        row, col = move
         player = "X" if i % 2 == 0 else "O"
+        
+        board[row][col] = player
 
         replay.append({
             "moveNumber": i + 1,
             "player": player,
-            "position": move
+            "position": move,
+            #move snapshot
+            "board": [r[:] for r in board]
         })
 
     return replay
@@ -128,15 +151,21 @@ def generate_pruning_insight(metrics, alpha_beta):
     pruned = metrics.get("nodesPruned", 0)
 
     if not alpha_beta:
-        return "Alpha-Beta pruning was disabled. All nodes were explored."
+        return (
+            "Alpha-Beta pruning was disabled. The algorithm explored the full search tree "
+            "without eliminating any branches for optimized play."
+        )
 
     if pruned == 0:
-        return "Alpha-Beta pruning was enabled, but no branches were pruned in this move."
+        return (
+            "Alpha-Beta pruning was enabled, but no branches were pruned. "
+            "This can happen when the current game state does not naturally permit early cutoffs."
+        )
 
     total = explored + pruned
     reduction = (pruned / total) * 100 if total > 0 else 0
 
     return (
-        f"Alpha-Beta pruning explored {explored} nodes and skipped {pruned}, "
-        f"reducing the search space by {reduction:.1f}%."
+        f"Alpha-Beta pruning reduced the search space by approximately {reduction:.1f}%. "
+        f"The algorithm explored {explored} nodes and pruned {pruned} nodes that could not affect the final decision."
     )
