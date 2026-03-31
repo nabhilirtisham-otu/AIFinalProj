@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from minimax import MinimaxAI
 from game import Game
+from analytics import generate_full_analysis
 
 #initialize Flask app
 app = Flask(__name__)
@@ -23,17 +24,28 @@ def make_move():
         difficulty = data.get("difficulty", "easy")
         use_alpha_beta = data.get("alphaBeta", True)
         
+        move_history = data.get("moveHistory", []) #added for analytics
         #call ai using extracted values from frontend JSON
         result = ai.get_best_move(
             board=board,
             difficulty=difficulty,
             use_alpha_beta=use_alpha_beta
         )
-        
+        #more game analysis changes
+        analysis = generate_full_analysis(
+            game,
+            board,
+            result,
+            difficulty,
+            use_alpha_beta,
+            move_history
+        )
         #Response JSON returned (success)
         return jsonify({
             "success": True,
             "data": result
+            "analysis": analysis
+
         })
         
     except Exception as e:
