@@ -49,7 +49,7 @@ class MinimaxAI:
             "move": best_move,
             "score": best_score,
             "metrics": {
-                "nodesExplore": self.nodes_explored,
+                "nodesExplored": self.nodes_explored,
                 "nodesPruned": self.nodes_pruned,
                 "timeMs": int((self.end_time - self.start_time) * 1000),
                 "depthLimit": depth_limit
@@ -111,7 +111,7 @@ class MinimaxAI:
                         self.nodes_pruned += 1
                         break
                 
-                return best_score, best_move, evals
+            return best_score, best_move, evals
         
         #human's turn (minimizing opponent's score)
         else:
@@ -137,7 +137,7 @@ class MinimaxAI:
                         self.nodes_pruned += 1
                         break
                 
-                return best_score, best_move, []
+            return best_score, best_move, []
     
     #evaluate heuristics (non-terminal states)
     def evaluate_board(self, board, ai_player, human_player):
@@ -148,11 +148,11 @@ class MinimaxAI:
         for i in range(3):
             #add each row and each element in every row to build columns
             lines.append(board[i])
-            lines.append(board[0][i], board[1][i], board[2][i])
+            lines.append([board[0][i], board[1][i], board[2][i]])
         
         #add diagonals
-        lines.append(board[0][0], board[1][1], board[2][2])
-        lines.append(board[2][0], board[1][1], board[0][2])
+        lines.append([board[0][0], board[1][1], board[2][2]])
+        lines.append([board[2][0], board[1][1], board[0][2]])
         
         for line in lines:
             #if line has at least one AI piece and no human pieces, it is still winnable for the AI
