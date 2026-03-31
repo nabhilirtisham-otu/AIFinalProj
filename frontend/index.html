@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="game-wrapper">
+    <div class="split-layout">
+        <!-- Game Panel -->
+        <div class="game-panel">
+            <div class="mode-bar">
+                <button class="mode-btn" data-mode="2player">2 Players</button>
+                <button class="mode-btn active" data-mode="ai">vs AI</button>
+                <div class="diff-group">
+                    <span style="font-size: 13px;">Difficulty:</span>
+                    <select id="difficultySelect" class="diff-select">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <div class="ab-toggle">
+                    <span>α-β</span>
+                    <input type="checkbox" id="alphaBetaToggle" checked>
+                </div>
+            </div>
+
+            <div class="board" id="board"></div>
+
+            <div class="turn-status" id="turnStatus">
+                Your turn (X)
+            </div>
+
+            <div class="controls">
+                <button id="resetBtn">Reset</button>
+                <button id="newGameBtn" class="primary">New Game</button>
+            </div>
+            <div class="api-hint" id="apiHint">
+                Flask backend on port 5000
+            </div>
+        </div>
+
+        <!-- Analytics Panel -->
+        <div class="analytics-panel" id="analyticsPanel">
+            <div class="analytics-section">
+                <div class="analytics-title">Game Summary</div>
+                <div id="summaryArea" class="summary-box">—</div>
+            </div>
+            <div class="analytics-section">
+                <div class="analytics-title">Search Metrics</div>
+                <div id="metricsArea" class="metric-grid">—</div>
+            </div>
+            <div class="analytics-section">
+                <div class="analytics-title">Move Evaluation</div>
+                <div id="moveBreakdownArea" class="move-list">—</div>
+            </div>
+            <div class="analytics-section">
+                <div class="analytics-title">AI Explanation</div>
+                <div id="explanationArea" class="explanation-text">—</div>
+            </div>
+            <div class="analytics-section">
+                <div class="analytics-title">Pruning Insight</div>
+                <div id="pruningArea" class="explanation-text">—</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
