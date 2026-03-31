@@ -110,21 +110,21 @@ function updateTurnDisplay() {
     const turnDiv = document.getElementById("turnStatus");
     if (!gameActive) {
         if (winnerInfo && winnerInfo.winner) {
-            turnDiv.innerHTML = `${winnerInfo.winner} wins!`;
+            turnDiv.innerHTML = winnerInfo.winner + " wins!";
         } else if (getFlatBoard().every(cell => cell !== "")) {
-            turnDiv.innerHTML = `Draw! Game over.`;
+            turnDiv.innerHTML = "Draw! Game over.";
         } else {
-            turnDiv.innerHTML = `Game over`;
+            turnDiv.innerHTML = "Game over";
         }
         return;
     }
     if (gameMode === "2player") {
-        turnDiv.innerHTML = `Player ${currentPlayer}'s turn`;
+        turnDiv.innerHTML = "Player " + currentPlayer + "'s turn";
     } else {
         if (currentPlayer === "X") {
-            turnDiv.innerHTML = `Your turn (X)`;
+            turnDiv.innerHTML = "Your turn (X)";
         } else {
-            turnDiv.innerHTML = `AI thinking...`;
+            turnDiv.innerHTML = "AI thinking...";
         }
     }
 }
@@ -181,48 +181,52 @@ function renderAnalytics(analysis) {
 
     // Summary
     const summary = analysis.summary || {};
-    document.getElementById("summaryArea").innerHTML = `
-        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-            <span><strong>Result:</strong> ${summary.result || "—"}</span>
-            <span><strong>Difficulty:</strong> ${summary.difficulty || selectedDifficulty}</span>
-            <span><strong>α-β:</strong> ${summary.alphaBeta ? "ON" : "OFF"}</span>
-            <span><strong>Moves:</strong> ${summary.totalMoves ?? moveHistory.length}</span>
-        </div>
-    `;
+    let summaryHtml = '<div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">';
+    summaryHtml += '<span><strong>Result:</strong> ' + (summary.result || "—") + '</span>';
+    summaryHtml += '<span><strong>Difficulty:</strong> ' + (summary.difficulty || selectedDifficulty) + '</span>';
+    summaryHtml += '<span><strong>Alpha-Beta:</strong> ' + (summary.alphaBeta ? "ON" : "OFF") + '</span>';
+    summaryHtml += '<span><strong>Moves:</strong> ' + (summary.totalMoves !== undefined ? summary.totalMoves : moveHistory.length) + '</span>';
+    summaryHtml += '</div>';
+    document.getElementById("summaryArea").innerHTML = summaryHtml;
 
     // Metrics
     const metrics = analysis.metrics || {};
-    document.getElementById("metricsArea").innerHTML = `
-        <div class="metric">
-            <span>Nodes Explored</span>
-            <span class="metric-value">${metrics.nodesExplored ?? 0}</span>
-        </div>
-        <div class="metric">
-            <span>Nodes Pruned</span>
-            <span class="metric-value">${metrics.nodesPruned ?? 0}</span>
-        </div>
-        <div class="metric">
-            <span>Time (ms)</span>
-            <span class="metric-value">${metrics.timeMs ?? 0}</span>
-        </div>
-        <div class="metric">
-            <span>Depth Limit</span>
-            <span class="metric-value">${metrics.depthLimit ?? 0}</span>
-        </div>
-    `;
+    if (metrics.nodesExplored !== undefined) {
+        document.getElementById("metricsArea").innerHTML = `
+            <div class="metric">
+                <span>Nodes Explored</span>
+                <span class="metric-value">${metrics.nodesExplored || 0}</span>
+            </div>
+            <div class="metric">
+                <span>Nodes Pruned</span>
+                <span class="metric-value">${metrics.nodesPruned || 0}</span>
+            </div>
+            <div class="metric">
+                <span>Time (ms)</span>
+                <span class="metric-value">${metrics.timeMs || 0}</span>
+            </div>
+            <div class="metric">
+                <span>Depth Limit</span>
+                <span class="metric-value">${metrics.depthLimit || 0}</span>
+            </div>
+        `;
+    } else {
+        document.getElementById("metricsArea").innerHTML = '<div style="color: #999; text-align: center; grid-column: span 2;">No data yet</div>';
+    }
 
     // Move breakdown
     const moves = analysis.moveBreakdown || [];
     if (moves.length === 0) {
-        document.getElementById("moveBreakdownArea").innerHTML = `<div class="move-item">No candidate data</div>`;
+        document.getElementById("moveBreakdownArea").innerHTML = '<div style="color: #999; text-align: center; padding: 12px;">—</div>';
     } else {
         let movesHtml = "";
         moves.slice(0, 6).forEach(m => {
-            const moveStr = m.move ? `(${m.move[0]}, ${m.move[1]})` : "—";
+            const moveStr = m.move ? "(" + m.move[0] + ", " + m.move[1] + ")" : "—";
+            const scoreStr = m.score !== undefined ? m.score.toFixed(2) : m.score;
             movesHtml += `
                 <div class="move-item">
-                    <span><strong>${moveStr}</strong>  score: ${m.score?.toFixed(2) ?? m.score}</span>
-                    ${m.isBest ? '<span class="best-badge">BEST</span>' : `<span style="font-size: 11px;">rank #${m.rank}</span>`}
+                    <span><strong>${moveStr}</strong>  score: ${scoreStr}</span>
+                    ${m.isBest ? '<span class="best-badge">BEST</span>' : '<span style="font-size: 11px;">rank #' + m.rank + '</span>'}
                 </div>
             `;
         });
@@ -236,6 +240,29 @@ function renderAnalytics(analysis) {
     // Pruning insight
     const pruning = analysis.pruningInsight || "Pruning insight will appear here.";
     document.getElementById("pruningArea").innerHTML = pruning;
+}
+
+// Check backend health
+async function checkBackendHealth() {
+    try {
+        const response = await fetch("http://127.0.0.1:5000/health", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        });
+        if (response.ok) {
+            document.getElementById("apiHint").innerHTML = "Backend connected on port 5000";
+            document.getElementById("apiHint").style.color = "#2e7d32";
+            return true;
+        } else {
+            document.getElementById("apiHint").innerHTML = "Backend error - check server";
+            document.getElementById("apiHint").style.color = "#d32f2f";
+            return false;
+        }
+    } catch (err) {
+        document.getElementById("apiHint").innerHTML = "Backend not running on port 5000";
+        document.getElementById("apiHint").style.color = "#d32f2f";
+        return false;
+    }
 }
 
 // Call AI backend
@@ -270,9 +297,6 @@ async function requestAIMove() {
             
             if (move && move.length === 2 && board[move[0]][move[1]] === "") {
                 applyMove(move[0], move[1], "O");
-                if (gameActive && currentPlayer === "X") {
-                    // human turn
-                }
                 updateClickability();
             }
             
@@ -280,16 +304,16 @@ async function requestAIMove() {
                 renderAnalytics(analysis);
             }
             
-            document.getElementById("apiHint").innerHTML = "✓ Backend connected";
+            document.getElementById("apiHint").innerHTML = "Backend connected";
             document.getElementById("apiHint").style.color = "#2e7d32";
         } else {
             console.error("AI error:", result.error);
-            document.getElementById("apiHint").innerHTML = "⚠️ Backend error: " + (result.error || "unknown");
+            document.getElementById("apiHint").innerHTML = "Backend error: " + (result.error || "unknown");
             document.getElementById("apiHint").style.color = "#d32f2f";
         }
     } catch (err) {
         console.error("Fetch failed:", err);
-        document.getElementById("apiHint").innerHTML = "❌ Cannot reach Flask backend (port 5000)";
+        document.getElementById("apiHint").innerHTML = "Cannot reach backend on port 5000";
         document.getElementById("apiHint").style.color = "#d32f2f";
     }
 }
@@ -306,7 +330,7 @@ function handleCellClick(row, col) {
         if (currentPlayer === "X") {
             const success = applyMove(row, col, "X");
             if (success && gameActive && currentPlayer === "O") {
-                setTimeout(() => requestAIMove(), 80);
+                setTimeout(function() { requestAIMove(); }, 80);
             }
             updateClickability();
         }
@@ -333,9 +357,10 @@ function buildBoard() {
 // Event listeners for UI controls
 function setupEventListeners() {
     // Mode buttons
-    document.querySelectorAll(".mode-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+    const modeBtns = document.querySelectorAll(".mode-btn");
+    modeBtns.forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            modeBtns.forEach(function(b) { b.classList.remove("active"); });
             btn.classList.add("active");
             gameMode = btn.getAttribute("data-mode");
             fullReset();
@@ -344,23 +369,25 @@ function setupEventListeners() {
 
     // Difficulty select
     const diffSelect = document.getElementById("difficultySelect");
-    diffSelect.addEventListener("change", (e) => {
+    diffSelect.addEventListener("change", function(e) {
         selectedDifficulty = e.target.value;
     });
 
     // Alpha-beta toggle
     const abToggle = document.getElementById("alphaBetaToggle");
-    abToggle.addEventListener("change", (e) => {
+    abToggle.addEventListener("change", function(e) {
         useAlphaBeta = e.target.checked;
     });
 
     // Reset button
-    document.getElementById("resetBtn").addEventListener("click", () => {
+    const resetBtn = document.getElementById("resetBtn");
+    resetBtn.addEventListener("click", function() {
         fullReset();
     });
 
     // New game button
-    document.getElementById("newGameBtn").addEventListener("click", () => {
+    const newGameBtn = document.getElementById("newGameBtn");
+    newGameBtn.addEventListener("click", function() {
         fullReset();
     });
 }
@@ -370,6 +397,7 @@ function init() {
     buildBoard();
     setupEventListeners();
     fullReset();
+    checkBackendHealth();
 }
 
 // Start the app when DOM is ready
