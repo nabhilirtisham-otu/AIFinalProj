@@ -27,6 +27,10 @@ def make_move():
         use_alpha_beta = data.get("alphaBeta", True)
         
         move_history = [tuple(m) for m in data.get("moveHistory", [])] #added for analytics
+        
+        if not board or len(board) != 3 or any(len(row) != 3 for row in board):
+            return jsonify({"success": False, "error": "Invalid board format"}), 400
+        
         #call ai using extracted values from frontend JSON
         result = ai.get_best_move(
             board=board,

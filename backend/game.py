@@ -50,11 +50,9 @@ class Game:
     
     #check if the players have drawn
     def is_draw(self, board):
-        if len(self.get_available_moves(board)) == 0 and \
+        return len(self.get_available_moves(board)) == 0 and \
             not self.is_winner(board, "X") and \
-            not self.is_winner(board, "O"):
-                return True
-        return False
+            not self.is_winner(board, "O")
             
     
     #end game if win/draw (return True)

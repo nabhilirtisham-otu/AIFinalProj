@@ -69,13 +69,12 @@ def process_metrics(metrics):
 def analyze_moves(evals, best_move):
     
     results = []
-    
+
     if not evals:
         return results
-    
-    #sort moves (best first)
-    sorted_evals = sorted(evals, key=lambda x: x["score"], reverse= True)
-    best_score = sorted_evals[0]["score"]
+
+    sorted_evals = sorted(evals, key=lambda x: x["score"], reverse=True)
+    best_score = sorted_evals[0]["score"] if sorted_evals else 0
     
     for idx, item in enumerate(sorted_evals):
         move = item.get("move")
@@ -95,14 +94,14 @@ def analyze_moves(evals, best_move):
 #explanation of the ai's moves
 def generate_explanation(score, best_move, evals):
 
-    if score == 1:
-        return f"Move {best_move} was chosen because it guarantees a win with optimal play."
+    if score > 0:
+        return f"Move {best_move} was chosen because it leads to a favorable position (score: {score})."
 
     elif score == 0:
         return f"Move {best_move} ensures a draw with optimal play."
 
-    elif score == -1:
-        return f"All possible moves lead to a loss. Move {best_move} was the least damaging option."
+    elif score < 0:
+        return f"All evaluated moves are unfavorable. Move {best_move} was the least damaging option (score: {score})."
 
     #fallback: compare moves
     if evals and len(evals) > 1:

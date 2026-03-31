@@ -108,7 +108,7 @@ class MinimaxAI:
                 if use_ab:
                     alpha = max(alpha, best_score)
                     if beta <= alpha:
-                        self.nodes_pruned += 1
+                        self.nodes_pruned += len(moves) - moves.index(move) - 1
                         break
                 
             return best_score, best_move, evals
@@ -125,6 +125,9 @@ class MinimaxAI:
                 #recursively evaluate opponent response (maximize own score)
                 score, _, _ = self.minimax(new_board, depth+1, True, alpha, beta, config)
                 
+                if depth == 0:
+                    evals.append({"move": move, "score": score})
+                
                 #replace best move and associated score if better one found
                 if score < best_score:
                     best_score = score
@@ -134,10 +137,10 @@ class MinimaxAI:
                 if use_ab:
                     beta = min(beta, best_score)
                     if beta <= alpha:
-                        self.nodes_pruned += 1
+                        self.nodes_pruned += len(moves) - moves.index(move) - 1
                         break
                 
-            return best_score, best_move, []
+            return best_score, best_move, evals
     
     #evaluate heuristics (non-terminal states)
     def evaluate_board(self, board, ai_player, human_player):
@@ -177,4 +180,4 @@ class MinimaxAI:
     
     #stop recursion if depth being explored is greater than the limit
     def should_use_heuristic(self, depth, depth_limit):
-        return depth >= depth_limit
+        return depth > depth_limit
