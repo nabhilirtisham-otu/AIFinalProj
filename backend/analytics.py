@@ -141,7 +141,10 @@ def generate_pruning_insight(metrics, alpha_beta):
     if pruned == 0:
         return "Alpha-Beta pruning was enabled, but no branches were pruned in this move."
 
+    total = explored + pruned
+    reduction = (pruned / total) * 100 if total > 0 else 0
+
     return (
-        f"Alpha-Beta pruning avoided exploring {pruned} unnecessary nodes, "
-        f"improving efficiency compared to standard minimax."
+        f"Alpha-Beta pruning explored {explored} nodes and skipped {pruned}, "
+        f"reducing the search space by {reduction:.1f}%."
     )
