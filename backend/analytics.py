@@ -3,10 +3,8 @@ This file is where all the data is visualized
 '''
 
 #Main func
-
 def generate_full_analysis(game, board, ai_result, difficulty, alpha_beta, move_history):
 #all analytics into one, central aggregator
-
 
     summary = generate_summary(game, board, difficulty, alpha_beta, move_history)
 
@@ -37,7 +35,6 @@ def generate_full_analysis(game, board, ai_result, difficulty, alpha_beta, move_
     }
 
 #summary of the game, det result+metadata
-
 def generate_summary(game, board, difficulty, alpha_beta, move_history):
 
     if game.is_winner(board, "O"):
@@ -58,7 +55,6 @@ def generate_summary(game, board, difficulty, alpha_beta, move_history):
 
 
 #metrics/normalization
-
 def process_metrics(metrics):
 
     return {
@@ -70,7 +66,6 @@ def process_metrics(metrics):
 
 
 #eval all moves and flags the best
-
 def analyze_moves(evals, best_move):
 
     results = []
@@ -92,7 +87,6 @@ def analyze_moves(evals, best_move):
 
 
 #explanation of the ai's moves
-
 def generate_explanation(score, best_move, evals):
 
     if score == 1:
@@ -112,7 +106,6 @@ def generate_explanation(score, best_move, evals):
     return "The AI selected the move with the best available evaluation."
 
 #replay of the game
-
 def build_replay(move_history):
 
     replay = []
@@ -129,7 +122,6 @@ def build_replay(move_history):
     return replay
 
 #pruning explained
-
 def generate_pruning_insight(metrics, alpha_beta):
 
     explored = metrics.get("nodesExplored", 0)

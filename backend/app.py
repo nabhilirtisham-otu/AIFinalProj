@@ -43,7 +43,7 @@ def make_move():
         #Response JSON returned (success)
         return jsonify({
             "success": True,
-            "data": result
+            "data": result,
             "analysis": analysis
 
         })
