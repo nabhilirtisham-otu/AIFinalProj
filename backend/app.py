@@ -2,9 +2,11 @@ from flask import Flask, request, jsonify
 from minimax import MinimaxAI
 from game import Game
 from analytics import generate_full_analysis
+from flask_cors import CORS
 
 #initialize Flask app
 app = Flask(__name__)
+CORS(app)
 
 #create game instance and pass it into AI
 game = Game()
@@ -24,7 +26,7 @@ def make_move():
         difficulty = data.get("difficulty", "easy")
         use_alpha_beta = data.get("alphaBeta", True)
         
-        move_history = data.get("moveHistory", []) #added for analytics
+        move_history = [tuple(m) for m in data.get("moveHistory", [])] #added for analytics
         #call ai using extracted values from frontend JSON
         result = ai.get_best_move(
             board=board,
