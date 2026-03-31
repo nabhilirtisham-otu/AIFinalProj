@@ -91,7 +91,7 @@ def analyze_moves(evals, best_move):
     return results
 
 
-#explination of the ai's moves
+#explanation of the ai's moves
 
 def generate_explanation(score, best_move, evals):
 
