@@ -2,6 +2,7 @@
 This file is where all the data is visualized
 '''
 
+#3
 #Main func
 def generate_full_analysis(game, board, ai_result, difficulty, alpha_beta, move_history):
 #all analytics into one, central aggregator
@@ -34,6 +35,7 @@ def generate_full_analysis(game, board, ai_result, difficulty, alpha_beta, move_
         "pruningInsight": pruning
     }
 
+#3
 #summary of the game, det result+metadata
 def generate_summary(game, board, difficulty, alpha_beta, move_history):
 

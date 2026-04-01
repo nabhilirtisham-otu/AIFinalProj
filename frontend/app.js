@@ -1,4 +1,4 @@
-// Game state
+//game state
 let board = [
     ["", "", ""],
     ["", "", ""],
@@ -12,7 +12,7 @@ let selectedDifficulty = "medium";
 let useAlphaBeta = true;
 let moveHistory = [];
 
-// Win patterns (index 0-8)
+//win patterns (index 0-8)
 const winPatterns = [
     [0,1,2], [3,4,5], [6,7,8],
     [0,3,6], [1,4,7], [2,5,8],
@@ -21,20 +21,20 @@ const winPatterns = [
 
 const API_URL = "http://127.0.0.1:5000/make-move";
 
-// Difficulty display names
+//difficulty display names
 const DIFF_LABELS = {
     easy:   "Easy",
     medium: "Medium",
     hard:   "Hard"
 };
 
-// ── Difficulty Modal ────────────────────────────────────────────────
+//difficulty modal
 
 function openDiffModal() {
     const overlay = document.getElementById("diffModalOverlay");
     overlay.classList.add("open");
 
-    // Highlight currently selected card
+    //highlight card being hovered over
     document.querySelectorAll(".diff-card").forEach(function(card) {
         card.classList.toggle("selected", card.getAttribute("data-difficulty") === selectedDifficulty);
     });
@@ -55,17 +55,17 @@ function setupDiffModal() {
     const overlay = document.getElementById("diffModalOverlay");
     const modal = document.getElementById("diffModal");
 
-    // Open modal when button clicked
+    //open modal on button click
     btn.addEventListener("click", openDiffModal);
 
-    // Click on overlay (outside modal) closes without changing
+    //click on overlay (outside modal), close w/o changing
     overlay.addEventListener("click", function(e) {
         if (!modal.contains(e.target)) {
             closeDiffModal();
         }
     });
 
-    // Click on a difficulty card selects it and closes
+    //clicking on difficulty card selects it and closes
     document.querySelectorAll(".diff-card").forEach(function(card) {
         card.addEventListener("click", function() {
             setDifficulty(card.getAttribute("data-difficulty"));
@@ -73,9 +73,7 @@ function setupDiffModal() {
     });
 }
 
-// ── Board Helpers ───────────────────────────────────────────────────
-
-// Helper: flatten board for win detection
+//helper: flatten board for win detection
 function getFlatBoard() {
     let flat = [];
     for (let i = 0; i < 3; i++) {
@@ -86,7 +84,7 @@ function getFlatBoard() {
     return flat;
 }
 
-// Check win/draw from current board
+//check win/draw from current board
 function checkGameStatus() {
     const flat = getFlatBoard();
     for (let pattern of winPatterns) {
@@ -100,7 +98,7 @@ function checkGameStatus() {
     return null;
 }
 
-// Update game state after move
+//update game state after move
 function updateGameEnd() {
     const status = checkGameStatus();
     if (status) {
@@ -121,7 +119,7 @@ function updateGameEnd() {
     return false;
 }
 
-// Render board UI
+//render board UI
 function renderBoard() {
     const cells = document.querySelectorAll(".cell");
     for (let i = 0; i < cells.length; i++) {
@@ -183,7 +181,7 @@ function updateTurnDisplay() {
     }
 }
 
-// Apply move and switch turn
+//apply move and switch turn
 function applyMove(row, col, player) {
     if (!gameActive) return false;
     if (board[row][col] !== "") return false;
@@ -206,7 +204,7 @@ function applyMove(row, col, player) {
     return true;
 }
 
-// Reset game
+//reset game
 function fullReset() {
     board = [
         ["", "", ""],
@@ -221,7 +219,7 @@ function fullReset() {
     updateTurnDisplay();
     updateClickability();
 
-    // Clear analytics
+    //clear analytics
     document.getElementById("summaryArea").innerHTML = "—";
     document.getElementById("metricsArea").innerHTML = "—";
     document.getElementById("moveBreakdownArea").innerHTML = "—";
@@ -229,12 +227,10 @@ function fullReset() {
     document.getElementById("pruningArea").innerHTML = "—";
 }
 
-// ── Analytics Rendering ─────────────────────────────────────────────
-
 function renderAnalytics(analysis) {
     if (!analysis) return;
 
-    // Summary
+    //summary
     const summary = analysis.summary || {};
     let summaryHtml = '<div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">';
     summaryHtml += '<span><strong>Result:</strong> ' + (summary.result || "—") + '</span>';
@@ -244,7 +240,7 @@ function renderAnalytics(analysis) {
     summaryHtml += '</div>';
     document.getElementById("summaryArea").innerHTML = summaryHtml;
 
-    // Metrics
+    //metrics
     const metrics = analysis.metrics || {};
     if (metrics.nodesExplored !== undefined) {
         document.getElementById("metricsArea").innerHTML = `
@@ -269,7 +265,7 @@ function renderAnalytics(analysis) {
         document.getElementById("metricsArea").innerHTML = '<div style="color: #999; text-align: center; grid-column: span 2;">No data yet</div>';
     }
 
-    // Move breakdown
+    //move breakdown
     const moves = analysis.moveBreakdown || [];
     if (moves.length === 0) {
         document.getElementById("moveBreakdownArea").innerHTML = '<div style="color: #999; text-align: center; padding: 12px;">—</div>';
@@ -288,18 +284,16 @@ function renderAnalytics(analysis) {
         document.getElementById("moveBreakdownArea").innerHTML = movesHtml;
     }
 
-    // Explanation
+    //explanation
     const explanation = analysis.explanation || "AI decision explanation not available";
     document.getElementById("explanationArea").innerHTML = explanation;
 
-    // Pruning insight
+    //pruning insight
     const pruning = analysis.pruningInsight || "Pruning insight will appear here.";
     document.getElementById("pruningArea").innerHTML = pruning;
 }
 
-// ── Backend Communication ───────────────────────────────────────────
-
-// Check backend health
+//check backend health
 async function checkBackendHealth() {
     try {
         const response = await fetch("http://127.0.0.1:5000/health", {
@@ -322,7 +316,7 @@ async function checkBackendHealth() {
     }
 }
 
-// Call AI backend
+//call AI backend
 async function requestAIMove() {
     if (gameMode !== "ai") return;
     if (!gameActive) return;
@@ -332,7 +326,8 @@ async function requestAIMove() {
 
     const boardPayload = board.map(row => [...row]);
     const moveHistoryPayload = moveHistory.map(m => [m[0], m[1]]);
-
+    
+    //#1
     try {
         const response = await fetch(API_URL, {
             method: "POST",
@@ -375,9 +370,7 @@ async function requestAIMove() {
     }
 }
 
-// ── Game Interaction ────────────────────────────────────────────────
-
-// Handle cell click
+//handle cell click
 function handleCellClick(row, col) {
     if (!gameActive) return;
     if (winnerInfo) return;
@@ -396,7 +389,7 @@ function handleCellClick(row, col) {
     }
 }
 
-// Build board DOM
+//build board DOM
 function buildBoard() {
     const boardContainer = document.getElementById("board");
     boardContainer.innerHTML = "";
@@ -413,9 +406,9 @@ function buildBoard() {
     renderBoard();
 }
 
-// Event listeners for UI controls
+//event listeners for UI controls
 function setupEventListeners() {
-    // Mode buttons
+    //mode buttons
     const modeBtns = document.querySelectorAll(".mode-btn");
     modeBtns.forEach(function(btn) {
         btn.addEventListener("click", function() {
@@ -426,26 +419,24 @@ function setupEventListeners() {
         });
     });
 
-    // Alpha-beta toggle
+    //alpha-beta toggle
     const abToggle = document.getElementById("alphaBetaToggle");
     abToggle.addEventListener("change", function(e) {
         useAlphaBeta = e.target.checked;
     });
 
-    // Reset button
+    //reset button
     const resetBtn = document.getElementById("resetBtn");
     resetBtn.addEventListener("click", function() {
         fullReset();
     });
 
-    // New game button
+    //new game button
     const newGameBtn = document.getElementById("newGameBtn");
     newGameBtn.addEventListener("click", function() {
         fullReset();
     });
 }
-
-// ── Init ────────────────────────────────────────────────────────────
 
 function init() {
     buildBoard();

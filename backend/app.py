@@ -15,6 +15,7 @@ ai = MinimaxAI(game)
 #POST API endpoint for making move (data sent from frontend)
 @app.route("/make-move", methods=["POST"])
 
+#5
 #runs when /make-move called
 def make_move():
     try:

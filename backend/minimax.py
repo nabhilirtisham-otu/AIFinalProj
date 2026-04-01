@@ -56,7 +56,8 @@ class MinimaxAI:
             },
             "evals": evals
         }
-        
+    
+    #2
     #main minimax function (recursive)
     def minimax(self, board, depth, is_maximizing, alpha, beta, config):
         self.nodes_explored += 1
