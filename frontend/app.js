@@ -21,6 +21,60 @@ const winPatterns = [
 
 const API_URL = "http://127.0.0.1:5000/make-move";
 
+// Difficulty display names
+const DIFF_LABELS = {
+    easy:   "Easy",
+    medium: "Medium",
+    hard:   "Hard"
+};
+
+// ── Difficulty Modal ────────────────────────────────────────────────
+
+function openDiffModal() {
+    const overlay = document.getElementById("diffModalOverlay");
+    overlay.classList.add("open");
+
+    // Highlight currently selected card
+    document.querySelectorAll(".diff-card").forEach(function(card) {
+        card.classList.toggle("selected", card.getAttribute("data-difficulty") === selectedDifficulty);
+    });
+}
+
+function closeDiffModal() {
+    document.getElementById("diffModalOverlay").classList.remove("open");
+}
+
+function setDifficulty(diff) {
+    selectedDifficulty = diff;
+    document.getElementById("diffLabel").textContent = DIFF_LABELS[diff] || diff;
+    closeDiffModal();
+}
+
+function setupDiffModal() {
+    const btn = document.getElementById("diffChangeBtn");
+    const overlay = document.getElementById("diffModalOverlay");
+    const modal = document.getElementById("diffModal");
+
+    // Open modal when button clicked
+    btn.addEventListener("click", openDiffModal);
+
+    // Click on overlay (outside modal) closes without changing
+    overlay.addEventListener("click", function(e) {
+        if (!modal.contains(e.target)) {
+            closeDiffModal();
+        }
+    });
+
+    // Click on a difficulty card selects it and closes
+    document.querySelectorAll(".diff-card").forEach(function(card) {
+        card.addEventListener("click", function() {
+            setDifficulty(card.getAttribute("data-difficulty"));
+        });
+    });
+}
+
+// ── Board Helpers ───────────────────────────────────────────────────
+
 // Helper: flatten board for win detection
 function getFlatBoard() {
     let flat = [];
@@ -166,7 +220,7 @@ function fullReset() {
     renderBoard();
     updateTurnDisplay();
     updateClickability();
-    
+
     // Clear analytics
     document.getElementById("summaryArea").innerHTML = "—";
     document.getElementById("metricsArea").innerHTML = "—";
@@ -175,7 +229,8 @@ function fullReset() {
     document.getElementById("pruningArea").innerHTML = "—";
 }
 
-// Render analytics from backend response
+// ── Analytics Rendering ─────────────────────────────────────────────
+
 function renderAnalytics(analysis) {
     if (!analysis) return;
 
@@ -242,6 +297,8 @@ function renderAnalytics(analysis) {
     document.getElementById("pruningArea").innerHTML = pruning;
 }
 
+// ── Backend Communication ───────────────────────────────────────────
+
 // Check backend health
 async function checkBackendHealth() {
     try {
@@ -272,7 +329,7 @@ async function requestAIMove() {
     if (currentPlayer !== "O") return;
 
     updateClickability();
-    
+
     const boardPayload = board.map(row => [...row]);
     const moveHistoryPayload = moveHistory.map(m => [m[0], m[1]]);
 
@@ -287,23 +344,23 @@ async function requestAIMove() {
                 moveHistory: moveHistoryPayload
             })
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             const aiData = result.data;
             const analysis = result.analysis;
             const move = aiData.move;
-            
+
             if (move && move.length === 2 && board[move[0]][move[1]] === "") {
                 applyMove(move[0], move[1], "O");
                 updateClickability();
             }
-            
+
             if (analysis) {
                 renderAnalytics(analysis);
             }
-            
+
             document.getElementById("apiHint").innerHTML = "Backend connected";
             document.getElementById("apiHint").style.color = "#2e7d32";
         } else {
@@ -317,6 +374,8 @@ async function requestAIMove() {
         document.getElementById("apiHint").style.color = "#d32f2f";
     }
 }
+
+// ── Game Interaction ────────────────────────────────────────────────
 
 // Handle cell click
 function handleCellClick(row, col) {
@@ -367,12 +426,6 @@ function setupEventListeners() {
         });
     });
 
-    // Difficulty select
-    const diffSelect = document.getElementById("difficultySelect");
-    diffSelect.addEventListener("change", function(e) {
-        selectedDifficulty = e.target.value;
-    });
-
     // Alpha-beta toggle
     const abToggle = document.getElementById("alphaBetaToggle");
     abToggle.addEventListener("change", function(e) {
@@ -392,13 +445,14 @@ function setupEventListeners() {
     });
 }
 
-// Initialize
+// ── Init ────────────────────────────────────────────────────────────
+
 function init() {
     buildBoard();
+    setupDiffModal();
     setupEventListeners();
     fullReset();
     checkBackendHealth();
 }
 
-// Start the app when DOM is ready
 document.addEventListener("DOMContentLoaded", init);
